@@ -69,8 +69,8 @@ RUN apt-get update -y \
     && apt-get install -y python3.8 python3-dev python3-pip libpq-dev \
     #&& apt-get remove -y software-properties-common \
     #&& python -m pip install --upgrade pip --user \
-    && python3.8 -m pip install --upgrade pip --user \
-    && pip3 install python-language-server flake8 autopep8 pyspark==${SPARK_VERSION} pandas psycopg2
+    && python3.8 -m pip install --upgrade pip --user
+    #&& pip3 install python-language-server flake8 autopep8 pyspark==${SPARK_VERSION} pandas psycopg2
     #python3-psycopg2 libpq-dev 
 
 #########
