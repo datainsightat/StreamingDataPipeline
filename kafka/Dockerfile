@@ -2,10 +2,13 @@
 #https://github.com/theia-ide/theia-apps
 #https://hadooptutorials.info/2020/10/11/part-4-install-spark-2/
 
-FROM ubuntu:20.04 as common
+FROM ubuntu:18.04 as common
 
 #Spark
-EXPOSE 8080 7077 8081 7000
+EXPOSE 8888 8080 7077 8081 7000
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -13,7 +16,7 @@ ENV JAVA_VERSION=8
 ENV JAVA_HOME=/usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 ENV PATH="$JAVA_HOME/bin:${PATH}"
 
-ENV SCALA_VERSION="2.12.14"
+#ENV SCALA_VERSION="2.12.14"
 #ENV KAFKA_MAJOR_VERSION="3.0.0"
 #Kafka Python is compatible Kafka 2.4
 #https://kafka-python.readthedocs.io/en/master/
@@ -51,14 +54,40 @@ ENV SSH_USER="root"
 ###########
 
 RUN apt-get update && \
-    apt-get install -y wget openssh-server openssh-client net-tools maven nano curl git
+    apt-get install -y wget curl openssh-server openssh-client git net-tools
 
 ########
 # JAVA #
 ########
 
 RUN apt-get update && \
-    apt-get -y install openjdk-$JAVA_VERSION-jdk openjdk-$JAVA_VERSION-jdk-headless
+    apt-get -y install openjdk-$JAVA_VERSION-jdk openjdk-$JAVA_VERSION-jdk-headless && \
+    ln -s /lib64/ld-linux-x86-64.so.2 /lib/ld-linux-x86-64.so.2
+
+#########
+# SCALA #
+#########
+
+RUN wget https://scala-lang.org/files/archive/scala-${SCALA_VERSION}.deb && \
+    apt-get install -y ./scala-${SCALA_VERSION}.deb && \
+    rm -rf scala-${SCALA_VERSION}.deb /var/lib/apt/lists/*
+
+#########
+# SPARK #
+#########
+
+#https://phoenixnap.com/kb/install-spark-on-ubuntu
+RUN wget https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
+    tar xvf spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
+    mv spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION/ $SPARK_HOME && \
+    rm spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz
+
+############
+# POSTGRES #
+############
+
+RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
+    mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
 
 ##########
 # PYTHON #
@@ -67,7 +96,7 @@ RUN apt-get update && \
 RUN apt-get update \
     && apt-get install -y software-properties-common \
     && add-apt-repository -y ppa:deadsnakes/ppa \
-    && apt-get install -y python-dev python-pip \
+    && apt-get install -y python python-dev python-pip \
     && apt-get install -y python3.8 python3-dev python3-pip \
     && apt-get remove -y software-properties-common \
     && python -m pip install --upgrade pip --user \
@@ -99,35 +128,6 @@ ADD zookeeper/zookeeper.properties $KAFKA_HOME/config/zookeeper.properties
 ####################
 
 ADD kafka/server.properties $KAFKA_HOME/config/connect-standalone.properties
-
-#########
-# SPARK #
-#########
-
-#https://phoenixnap.com/kb/install-spark-on-ubuntu
-RUN wget https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
-    tar xvf spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
-    mv spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION/ $SPARK_HOME && \
-    rm spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz
-
-############
-# POSTGRES #
-############
-
-RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
-    mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
-
-#########
-# FLUME #
-#########
-
-# #https://towardsdatascience.com/apache-kafka-and-flume-installation-guide-import-data-from-kafka-to-hdfs-c908b0df034c
-# RUN wget https://dlcdn.apache.org/flume/$FLUME_VERSION/apache-flume-$FLUME_VERSION-bin.tar.gz && \
-#     tar xvf apache-flume-$FLUME_VERSION-bin.tar.gz && \
-#     mv apache-flume-$FLUME_VERSION-bin/ $FLUME_HOME && \
-#     rm apache-flume-$FLUME_VERSION-bin.tar.gz
-
-# ADD flume/flume.conf $FLUME_HOME/conf/flume.conf
 
 ##########
 # FINISH #
