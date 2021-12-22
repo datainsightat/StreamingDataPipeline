@@ -15,34 +15,36 @@ ENV PATH="$JAVA_HOME/bin:${PATH}"
 
 ENV SCALA_VERSION="2.12.14"
 #ENV KAFKA_MAJOR_VERSION="3.0.0"
-ENV KAFKA_MAJOR_VERSION="2.8.1"
+#Kafka Python is compatible Kafka 2.4
+#https://kafka-python.readthedocs.io/en/master/
+ENV KAFKA_MAJOR_VERSION="2.4.1"
 ENV KAFKA_MINOR_VERSION="2.12"
 ENV KAFKA_HOME=/opt/kafka
 ENV PATH="$KAFKA_HOME/bin:${PATH}"
 ENV PATH="$KAFKA_HOME/sbin:${PATH}"
 
+#Python Path
+ENV PATH="/usr/bin/python3:${PATH}"
+
 ENV ZOOKEEPER_HOME $KAFKA_HOME/data/zookeeper
 
-# ENV FLUME_VERSION="1.9.0"
-# ENV FLUME_HOME=/opt/flume
-# ENV PATH="$FLUME_HOME/bin:${PATH}"
+ENV SCALA_VERSION="2.12.14"
+ENV SPARK_VERSION="3.2.0"
+ENV SPARK_HADOOP_VERSION="3.2"
+ENV POSTGRES_JDBC_VERSION="42.3.1"
 
-# ENV SPARK_VERSION="3.2.0"
-# ENV SPARK_HADOOP_VERSION="3.2"
-# ENV POSTGRES_JDBC_VERSION="42.3.1"
+ENV SPARK_HOME /opt/spark
+ENV PATH="$SPARK_HOME/bin:${PATH}"
+ENV PATH="$SPARK_HOME/sbin:${PATH}"
+ENV PYSPARK_PYTHON=/usr/bin/python3
 
-# ENV SPARK_HOME /opt/spark
-# ENV PATH="$SPARK_HOME/bin:${PATH}"
-# ENV PATH="$SPARK_HOME/sbin:${PATH}"
-# ENV PYSPARK_PYTHON=/usr/bin/python3
+ENV SPARK_MASTER_HOST=spark
+ENV SPARK_MASTER_PORT=7077
+ENV SPARK_MASTER_WEBUI_PORT=8080
+ENV SPARK_WORKER_PORT=7000
+ENV SPARK_WORKLOAD="master"
 
-# ENV SPARK_MASTER_HOST=spark
-# ENV SPARK_MASTER_PORT=7077
-# ENV SPARK_MASTER_WEBUI_PORT=8080
-# ENV SPARK_WORKER_PORT=7000
-# ENV SPARK_WORKLOAD="master"
-
-# ENV SSH_USER="root"
+ENV SSH_USER="root"
 
 ###########
 # GENERAL #
@@ -62,23 +64,24 @@ RUN apt-get update && \
 # PYTHON #
 ##########
 
-RUN apt-get update -y \
+RUN apt-get update \
     && apt-get install -y software-properties-common \
-    #&& add-apt-repository -y ppa:deadsnakes/ppa \
-    #&& apt-get install -y python-dev python-pip \
-    && apt-get install -y python3.8 python3-dev python3-pip libpq-dev \
-    #&& apt-get remove -y software-properties-common \
-    #&& python -m pip install --upgrade pip --user \
-    && python3.8 -m pip install --upgrade pip --user
-    #&& pip3 install python-language-server flake8 autopep8 pyspark==${SPARK_VERSION} pandas psycopg2
-    #python3-psycopg2 libpq-dev 
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get install -y python-dev python-pip \
+    && apt-get install -y python3.8 python3-dev python3-pip \
+    && apt-get remove -y software-properties-common \
+    && python -m pip install --upgrade pip --user \
+    && python3.8 -m pip install --upgrade pip --user \
+    && pip3 install python-language-server flake8 autopep8
+
+RUN pip3 install kafka-python hdfs
 
 #########
 # KAFKA #
 #########
 
 #https://phoenixnap.com/kb/install-spark-on-ubuntu
-RUN wget https://dlcdn.apache.org/kafka/$KAFKA_MAJOR_VERSION/kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz && \
+RUN wget https://archive.apache.org/dist/kafka/$KAFKA_MAJOR_VERSION/kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz && \
     tar xvf kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz && \
     mv kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION/ $KAFKA_HOME && \
     rm kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz
@@ -96,6 +99,23 @@ ADD zookeeper/zookeeper.properties $KAFKA_HOME/config/zookeeper.properties
 ####################
 
 ADD kafka/server.properties $KAFKA_HOME/config/connect-standalone.properties
+
+#########
+# SPARK #
+#########
+
+#https://phoenixnap.com/kb/install-spark-on-ubuntu
+RUN wget https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
+    tar xvf spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
+    mv spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION/ $SPARK_HOME && \
+    rm spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz
+
+############
+# POSTGRES #
+############
+
+RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
+    mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
 
 #########
 # FLUME #
@@ -120,13 +140,13 @@ RUN mkdir $KAFKA_HOME/data && \
 
 # Create SSH key
 
-# RUN /etc/init.d/ssh start
+RUN /etc/init.d/ssh start
 
-# ADD ssh/config root/.ssh/config
+ADD ssh/config root/.ssh/config
 
-# RUN ssh-keygen -q -t rsa -P '' -f $SSH_USER/.ssh/id_rsa && \
-#     cat $SSH_USER/.ssh/id_rsa.pub >> $SSH_USER/.ssh/authorized_keys && \
-#     chmod 0600 $SSH_USER/.ssh/authorized_keys
+RUN ssh-keygen -q -t rsa -P '' -f $SSH_USER/.ssh/id_rsa && \
+    cat $SSH_USER/.ssh/id_rsa.pub >> $SSH_USER/.ssh/authorized_keys && \
+    chmod 0600 $SSH_USER/.ssh/authorized_keys
 
 ADD docker_start.sh /
 

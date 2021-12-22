@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#/etc/init.d/ssh start
+/etc/init.d/ssh start
 
 #Zookeeper
 $KAFKA_HOME/bin/zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties &
@@ -8,8 +8,8 @@ $KAFKA_HOME/bin/zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.propertie
 #Kafka
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties &
 
-#Flume
-#$flume-ng agent -n flume1 -c conf -f conf/flume.conf — Dflume.root.logger=INFO,console &
+#Spark
+$SPARK_HOME/sbin/start-all.sh
 
 #Keep Container alive
 tail -f /dev/null
