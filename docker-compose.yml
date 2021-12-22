@@ -61,4 +61,9 @@ services:
     image: kafka
     container_name: kafka
     restart: always
+    ports:
+     - "8080:8080"
+     - "7077:7077"
+     - "8081:8081"
+     - "7000:7000"
 

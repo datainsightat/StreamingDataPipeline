@@ -103,7 +103,7 @@ RUN apt-get update \
     && python3.8 -m pip install --upgrade pip --user \
     && pip3 install python-language-server flake8 autopep8
 
-RUN pip3 install kafka-python hdfs
+RUN pip3 install kafka-python pyspark
 
 #########
 # KAFKA #
