@@ -56,9 +56,13 @@ services:
       - "7077:7077"
       - "8081:8081"
       - "7000:7000"
+      - "8888:8888"
+    volumes:
+      - stream_workspace:/home
 
   kafka:
     image: stream_kafka
     container_name: stream_kafka
     restart: always
-
+    volumes:
+      - stream_workspace:/home

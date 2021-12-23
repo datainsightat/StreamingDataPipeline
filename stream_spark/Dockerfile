@@ -5,7 +5,7 @@
 FROM ubuntu:18.04 as common
 
 #Spark
-EXPOSE 8080 7077 8081 7000
+EXPOSE 8080 7077 8081 7000 8888
 
 ENV DEBIAN_FRONTEND noninteractive
 
