@@ -9,7 +9,7 @@ $KAFKA_HOME/bin/zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.propertie
 $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties &
 
 #Spark
-$SPARK_HOME/sbin/start-all.sh
+# $SPARK_HOME/sbin/start-all.sh
 
 #Keep Container alive
 tail -f /dev/null
