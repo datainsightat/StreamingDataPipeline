@@ -2,40 +2,40 @@ version: "3"
 
 volumes:
 
-  hadoop_namenode:
-  hadoop_datanode:
-  shared-workspace:
+  stream_hadoop_namenode:
+  stream_hadoop_datanode:
+  stream_workspace:
     external: true
-  postgres-data:
+  stream_postgres:
 
 services:
 
-  # db:
-  #   container_name: pg_container
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: root
-  #     POSTGRES_PASSWORD: root
-  #     POSTGRES_DB: newdb
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
+  db:
+    container_name: stream_pg
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: newdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - stream_postgres:/var/lib/postgresql/data
 
-  # pgadmin:
-  #   container_name: pgadmin4_container
-  #   image: dpage/pgadmin4
-  #   restart: always
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
-  #     PGADMIN_DEFAULT_PASSWORD: root
-  #   ports:
-  #     - "5050:80"
+  pgadmin:
+    container_name: stream_pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
 
   hive:
-    image: hive
-    container_name: hive
+    image: stream_hive
+    container_name: stream_hive
     restart: always
     ports:
      - "54310:54310"
@@ -44,26 +44,21 @@ services:
      - "5349:5349"
      - "5249:5249"
     volumes:
-      - hadoop_datanode:/opt/hadoop/hadoop_data/hdfs/datanode
-      - hadoop_namenode:/opt/hadoop/hadoop_data/hdfs/namenode
+      - stream_hadoop_datanode:/opt/hadoop/hadoop_data/hdfs/datanode
+      - stream_hadoop_namenode:/opt/hadoop/hadoop_data/hdfs/namenode
 
-  # spark:
-  #   image: spark
-  #   container_name: spark
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #     - "7077:7077"
-  #     - "8081:8081"
-  #     - "7000:7000"
-
-  kafka:
-    image: kafka
-    container_name: kafka
+  spark:
+    image: stream_spark
+    container_name: stream_spark
     restart: always
     ports:
-     - "8080:8080"
-     - "7077:7077"
-     - "8081:8081"
-     - "7000:7000"
+      - "8080:8080"
+      - "7077:7077"
+      - "8081:8081"
+      - "7000:7000"
+
+  kafka:
+    image: stream_kafka
+    container_name: stream_kafka
+    restart: always
 

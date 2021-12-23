@@ -5,7 +5,7 @@
 FROM ubuntu:18.04 as common
 
 #Spark
-EXPOSE 8888 8080 7077 8081 7000
+#EXPOSE 8888 8080 7077 8081 7000
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -32,22 +32,22 @@ ENV PATH="/usr/bin/python3:${PATH}"
 ENV ZOOKEEPER_HOME $KAFKA_HOME/data/zookeeper
 
 ENV SCALA_VERSION="2.12.14"
-ENV SPARK_VERSION="3.2.0"
-ENV SPARK_HADOOP_VERSION="3.2"
-ENV POSTGRES_JDBC_VERSION="42.3.1"
+# ENV SPARK_VERSION="3.2.0"
+# ENV SPARK_HADOOP_VERSION="3.2"
+# ENV POSTGRES_JDBC_VERSION="42.3.1"
 
-ENV SPARK_HOME /opt/spark
-ENV PATH="$SPARK_HOME/bin:${PATH}"
-ENV PATH="$SPARK_HOME/sbin:${PATH}"
-ENV PYSPARK_PYTHON=/usr/bin/python3
+# ENV SPARK_HOME /opt/spark
+# ENV PATH="$SPARK_HOME/bin:${PATH}"
+# ENV PATH="$SPARK_HOME/sbin:${PATH}"
+# ENV PYSPARK_PYTHON=/usr/bin/python3
 
-ENV SPARK_MASTER_HOST=spark
-ENV SPARK_MASTER_PORT=7077
-ENV SPARK_MASTER_WEBUI_PORT=8080
-ENV SPARK_WORKER_PORT=7000
-ENV SPARK_WORKLOAD="master"
+# ENV SPARK_MASTER_HOST=spark
+# ENV SPARK_MASTER_PORT=7077
+# ENV SPARK_MASTER_WEBUI_PORT=8080
+# ENV SPARK_WORKER_PORT=7000
+# ENV SPARK_WORKLOAD="master"
 
-ENV SSH_USER="root"
+# ENV SSH_USER="root"
 
 ###########
 # GENERAL #
@@ -72,23 +72,6 @@ RUN wget https://scala-lang.org/files/archive/scala-${SCALA_VERSION}.deb && \
     apt-get install -y ./scala-${SCALA_VERSION}.deb && \
     rm -rf scala-${SCALA_VERSION}.deb /var/lib/apt/lists/*
 
-#########
-# SPARK #
-#########
-
-#https://phoenixnap.com/kb/install-spark-on-ubuntu
-RUN wget https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
-    tar xvf spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz && \
-    mv spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION/ $SPARK_HOME && \
-    rm spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz
-
-############
-# POSTGRES #
-############
-
-RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
-    mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
-
 ##########
 # PYTHON #
 ##########
@@ -97,7 +80,7 @@ RUN apt-get update \
     && apt-get install -y software-properties-common \
     && add-apt-repository -y ppa:deadsnakes/ppa \
     && apt-get install -y python python-dev python-pip \
-    && apt-get install -y python3.8 python3-dev python3-pip \
+    && apt-get install -y python3.8 python3-dev python3-pip python3-pycurl\
     && apt-get remove -y software-properties-common \
     && python -m pip install --upgrade pip --user \
     && python3.8 -m pip install --upgrade pip --user \

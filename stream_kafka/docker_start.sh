@@ -1,6 +1,6 @@
 #!/bin/sh
 
-/etc/init.d/ssh start
+#/etc/init.d/ssh start
 
 #Zookeeper
 $KAFKA_HOME/bin/zookeeper-server-start.sh $KAFKA_HOME/config/zookeeper.properties &

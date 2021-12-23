@@ -12,13 +12,13 @@ This project provides an WebIDE to interact with Spark and Hadoop/Hive.
 
 Build the docker containers using the Dockerfiles provided in the subfolders of this repo.
 
-    $ docker build -t hive hive/.
-    $ docker build -t spark spark/.
-    $ docker build -t kafka kafka/.
+    $ docker build -t stream_hive stream_hive/.
+    $ docker build -t stream_spark stream_spark/.
+    $ docker build -t stream_kafka stream_kafka/.
 
 Create external volume
 
-    $ docker volume create --name=shared-workspace
+    $ docker volume create --name=stream_workspace
 
 ## Run Cluster
 

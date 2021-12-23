@@ -2,7 +2,7 @@
 #https://github.com/theia-ide/theia-apps
 #https://hadooptutorials.info/2020/10/11/part-4-install-spark-2/
 
-FROM ubuntu:20.04 as common
+FROM ubuntu:18.04 as common
 
 #Spark
 EXPOSE 8080 7077 8081 7000
@@ -30,6 +30,8 @@ ENV SPARK_WORKER_PORT=7000
 ENV SPARK_WORKLOAD="master"
 
 ENV SSH_USER="root"
+
+ENV JUPYTERLAB_VERSION="3.2.1"
 
 ###########
 # GENERAL #
@@ -63,12 +65,39 @@ RUN wget https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK
     mv spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION/ $SPARK_HOME && \
     rm spark-$SPARK_VERSION-bin-hadoop$SPARK_HADOOP_VERSION.tgz
 
+##########
+# PYTHON #
+##########
+
+RUN apt-get update \
+    && apt-get install -y software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get install -y python python-dev python-pip \
+    && apt-get install -y python3.8 python3-dev python3-pip python3-pycurl\
+    && apt-get remove -y software-properties-common \
+    && python -m pip install --upgrade pip --user \
+    && python3.8 -m pip install --upgrade pip --user \
+    && pip3 install python-language-server flake8 autopep8
+
+RUN pip3 install pyspark==${SPARK_VERSION} hdfs python-dotenv
+
 ############
 # POSTGRES #
 ############
 
 RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
     mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
+
+###################
+# Jupyter Kernels #
+###################
+
+# -- Layer: JupyterLab + Python kernel for PySpark
+
+RUN apt-get update -y && \
+    apt-get install -y python3-pip python3-dev && \
+    pip3 install --upgrade pip && \
+    pip3 install wget==3.2 pyspark==${SPARK_VERSION} jupyterlab==${JUPYTERLAB_VERSION}
 
 ##########
 # FINISH #
