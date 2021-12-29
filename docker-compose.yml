@@ -7,31 +7,33 @@ volumes:
   stream_workspace:
     external: true
   stream_postgres:
+  # stream_kafka_data:
+  # stream_zookeeper_data:
 
 services:
 
-  db:
-    container_name: stream_pg
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: newdb
-    ports:
-      - "5432:5432"
-    volumes:
-      - stream_postgres:/var/lib/postgresql/data
+  # db:
+  #   container_name: stream_pg
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_DB: newdb
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - stream_postgres:/var/lib/postgresql/data
 
-  pgadmin:
-    container_name: stream_pgadmin
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - "5050:80"
+  # pgadmin:
+  #   container_name: stream_pgadmin
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: root
+  #   ports:
+  #     - "5050:80"
 
   hive:
     image: stream_hive
@@ -47,22 +49,65 @@ services:
       - stream_hadoop_datanode:/opt/hadoop/hadoop_data/hdfs/datanode
       - stream_hadoop_namenode:/opt/hadoop/hadoop_data/hdfs/namenode
 
-  spark:
-    image: stream_spark
-    container_name: stream_spark
-    restart: always
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-      - "8081:8081"
-      - "7000:7000"
-      - "8888:8888"
-    volumes:
-      - stream_workspace:/home
+  # spark:
+  #   image: stream_spark
+  #   container_name: stream_spark
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #     - "7077:7077"
+  #     - "8081:8081"
+  #     - "7000:7000"
+  #     - "8888:8888"
+  #   volumes:
+  #     - stream_workspace:/home
 
-  kafka:
+  zookeeper:
     image: stream_kafka
-    container_name: stream_kafka
+    container_name: zookeeper
     restart: always
+    # volumes:
+    #   - stream_workspace:/home
+      # - stream_zookeeper_data:/opt/kafka/data/zookeeper
+    ports:
+      - "2181:2181"
+    command: /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+
+  kafka_broker_0:
+    image: stream_kafka
+    container_name: broker_0
+    restart: always
+    # environment:
+    #   BROKER_ID: 0
     volumes:
       - stream_workspace:/home
+      # - stream_kafka_data:/opt/kafka/data
+    ports:
+      - "9092:9092"
+    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server0.properties
+
+  kafka_broker_1:
+    image: stream_kafka
+    container_name: broker_1
+    restart: always
+    # environment:
+    #   BROKER_ID: 1
+    volumes:
+      - stream_workspace:/home
+      # - stream_kafka_data:/opt/kafka/data
+    ports:
+      - "9093:9092"
+    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server1.properties
+
+  kafka_broker_2:
+    image: stream_kafka
+    container_name: broker_2
+    restart: always
+    # environment:
+    #   BROKER_ID: 2
+    volumes:
+      - stream_workspace:/home
+      # - stream_kafka_data:/opt/kafka/data
+    ports:
+      - "9094:9092"
+    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server2.properties

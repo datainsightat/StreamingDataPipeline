@@ -29,6 +29,12 @@ ENV SPARK_MASTER_WEBUI_PORT=8080
 ENV SPARK_WORKER_PORT=7000
 ENV SPARK_WORKLOAD="master"
 
+ENV KAFKA_MAJOR_VERSION="2.4.1"
+ENV KAFKA_MINOR_VERSION="2.12"
+ENV KAFKA_HOME=/opt/kafka
+ENV PATH="$KAFKA_HOME/bin:${PATH}"
+ENV PATH="$KAFKA_HOME/sbin:${PATH}"
+
 ENV SSH_USER="root"
 
 ENV JUPYTERLAB_VERSION="3.2.1"
@@ -81,6 +87,17 @@ RUN apt-get update \
 
 RUN pip3 install pyspark==${SPARK_VERSION} hdfs python-dotenv
 
+# ###################
+# # Jupyter Kernels #
+# ###################
+
+# # -- Layer: JupyterLab + Python kernel for PySpark
+
+# RUN apt-get update -y && \
+#     apt-get install -y python3-pip python3-dev && \
+#     pip3 install --upgrade pip && \
+#     pip3 install wget==3.2 pyspark==${SPARK_VERSION} jupyterlab==${JUPYTERLAB_VERSION}
+
 ############
 # POSTGRES #
 ############
@@ -88,16 +105,17 @@ RUN pip3 install pyspark==${SPARK_VERSION} hdfs python-dotenv
 RUN wget https://jdbc.postgresql.org/download/postgresql-$POSTGRES_JDBC_VERSION.jar && \
     mv postgresql-$POSTGRES_JDBC_VERSION.jar $SPARK_HOME/jars
 
-###################
-# Jupyter Kernels #
-###################
+# #########
+# # KAFKA #
+# #########
 
-# -- Layer: JupyterLab + Python kernel for PySpark
+# #https://phoenixnap.com/kb/install-spark-on-ubuntu
+# RUN wget https://archive.apache.org/dist/kafka/$KAFKA_MAJOR_VERSION/kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz && \
+#     tar xvf kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz && \
+#     mv kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION/ $KAFKA_HOME && \
+#     rm kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz
 
-RUN apt-get update -y && \
-    apt-get install -y python3-pip python3-dev && \
-    pip3 install --upgrade pip && \
-    pip3 install wget==3.2 pyspark==${SPARK_VERSION} jupyterlab==${JUPYTERLAB_VERSION}
+# ADD kafka/server.properties $KAFKA_HOME/config/server.properties
 
 ##########
 # FINISH #

@@ -4,8 +4,8 @@
 
 FROM ubuntu:18.04 as common
 
-#Spark
-#EXPOSE 8888 8080 7077 8081 7000
+#Kafka
+EXPOSE 9092
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -26,13 +26,15 @@ ENV KAFKA_HOME=/opt/kafka
 ENV PATH="$KAFKA_HOME/bin:${PATH}"
 ENV PATH="$KAFKA_HOME/sbin:${PATH}"
 
+ENV BROKER_ID = 0
+
 #Python Path
 ENV PATH="/usr/bin/python3:${PATH}"
 
 ENV ZOOKEEPER_HOME $KAFKA_HOME/data/zookeeper
 
 ENV SCALA_VERSION="2.12.14"
-ENV SPARK_VERSION="3.2.0"
+# ENV SPARK_VERSION="3.2.0"
 # ENV SPARK_HADOOP_VERSION="3.2"
 # ENV POSTGRES_JDBC_VERSION="42.3.1"
 
@@ -86,7 +88,7 @@ RUN apt-get update \
     && python3.8 -m pip install --upgrade pip --user \
     && pip3 install python-language-server flake8 autopep8
 
-RUN pip3 install kafka-python pyspark==${SPARK_VERSION} hdfs python-dotenv
+RUN pip3 install kafka-python hdfs python-dotenv
 
 #########
 # KAFKA #
@@ -98,19 +100,21 @@ RUN wget https://archive.apache.org/dist/kafka/$KAFKA_MAJOR_VERSION/kafka_$KAFKA
     mv kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION/ $KAFKA_HOME && \
     rm kafka_$KAFKA_MINOR_VERSION-$KAFKA_MAJOR_VERSION.tgz
 
-ADD kafka/server.properties $KAFKA_HOME/config/server.properties
+ADD kafka/server0.properties $KAFKA_HOME/config/server0.properties
+ADD kafka/server1.properties $KAFKA_HOME/config/server1.properties
+ADD kafka/server2.properties $KAFKA_HOME/config/server2.properties
 
 #############
 # ZOOKEEPER #
 #############
 
-ADD zookeeper/zookeeper.properties $KAFKA_HOME/config/zookeeper.properties
+ADD kafka/zookeeper.properties $KAFKA_HOME/config/zookeeper.properties
 
 ####################
 # KAFKA Connectors #
 ####################
 
-ADD kafka/server.properties $KAFKA_HOME/config/connect-standalone.properties
+#ADD kafka/server.properties $KAFKA_HOME/config/connect-standalone.properties
 
 ##########
 # FINISH #
@@ -131,7 +135,7 @@ RUN ssh-keygen -q -t rsa -P '' -f $SSH_USER/.ssh/id_rsa && \
     cat $SSH_USER/.ssh/id_rsa.pub >> $SSH_USER/.ssh/authorized_keys && \
     chmod 0600 $SSH_USER/.ssh/authorized_keys
 
-ADD docker_start.sh /
+#ADD docker_start.sh /
 
 #Run at container start
-CMD ["bin/bash","docker_start.sh"]
+#CMD ["bin/bash","docker_start.sh"]
