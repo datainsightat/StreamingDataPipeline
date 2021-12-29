@@ -25,42 +25,6 @@ Create external volume
     $ docker-compose rm -svf
     $ docker-compose up
 
-    CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS           PORTS                                                                                                                                              NAMES
-49664c1e8d3e        stream_kafka        "/opt/kafka/bin/kafk…"   16 minutes ago      Up 16 minutes       0.0.0.0:9092->9092/tcp                                                                                                                             broker_0
-a754c6c6ac4f        stream_kafka        "/opt/kafka/bin/zook…"   16 minutes ago      Up 16 minutes       0.0.0.0:2181->2181/tcp, 9092/tcp                                                                                                                   zookeeper
-395a411b500b        stream_hive         "bin/bash docker_sta…"   16 minutes ago      Up 16 minutes       0.0.0.0:5249->5249/tcp, 5259/tcp, 0.0.0.0:5349->5349/tcp, 9083/tcp, 0.0.0.0:9870->9870/tcp, 0.0.0.0:54310-54311->54310-54311/tcp, 9999-10000/tcp   hdfs
-
-# Operation
-
-## Receive Datastream
-
-    $ docker container exec -it broker_0 /bin/bash
-    broker_0$ cd /home/
-    broker_0$ git clone https://github.com/datainsightat/StreamingDataPipeline_Code.git
-    broker_0$ cd /StreamingDataPipeline_Code/dna_spaces
-    broker_0$ python3 python3 dna_spaces_producer.py
-
-    $ docker container exec -it broker_0 /bin/bash
-    broker_0$ cd /home/StreamingDataPipeline_Code/dna_spaces
-    broker_0$ python3 python3 dna_spaces_consumer.py
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Access the Tools
 
 ### service Ports
