@@ -37,7 +37,7 @@ services:
 
   hive:
     image: stream_hive
-    container_name: stream_hive
+    container_name: hdfs
     restart: always
     ports:
      - "54310:54310"
@@ -45,6 +45,7 @@ services:
      - "9870:9870"
      - "5349:5349"
      - "5249:5249"
+    # network_mode: host
     volumes:
       - stream_hadoop_datanode:/opt/hadoop/hadoop_data/hdfs/datanode
       - stream_hadoop_namenode:/opt/hadoop/hadoop_data/hdfs/namenode
@@ -71,11 +72,14 @@ services:
       # - stream_zookeeper_data:/opt/kafka/data/zookeeper
     ports:
       - "2181:2181"
+    # network_mode: host
     command: /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
 
-  kafka_broker_0:
+  broker_0:
     image: stream_kafka
     container_name: broker_0
+    depends_on:
+      - zookeeper
     restart: always
     # environment:
     #   BROKER_ID: 0
@@ -84,30 +88,36 @@ services:
       # - stream_kafka_data:/opt/kafka/data
     ports:
       - "9092:9092"
+    # network_mode: host
     command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server0.properties
 
-  kafka_broker_1:
-    image: stream_kafka
-    container_name: broker_1
-    restart: always
-    # environment:
-    #   BROKER_ID: 1
-    volumes:
-      - stream_workspace:/home
-      # - stream_kafka_data:/opt/kafka/data
-    ports:
-      - "9093:9092"
-    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server1.properties
+  # broker_1:
+  #   image: stream_kafka
+  #   container_name: broker_1
+  #   depends_on:
+  #     - zookeeper
+  #   restart: always
+  #   # environment:
+  #   #   BROKER_ID: 1
+  #   volumes:
+  #     - stream_workspace:/home
+  #     # - stream_kafka_data:/opt/kafka/data
+  #   ports:
+  #     - "9093:9092"
+  #   # network_mode: host
+  #   command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server1.properties
 
-  kafka_broker_2:
-    image: stream_kafka
-    container_name: broker_2
-    restart: always
-    # environment:
-    #   BROKER_ID: 2
-    volumes:
-      - stream_workspace:/home
-      # - stream_kafka_data:/opt/kafka/data
-    ports:
-      - "9094:9092"
-    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server2.properties
+  # broker_2:
+  #   image: stream_kafka
+  #   container_name: broker_2
+  #   depends_on:
+  #     - zookeeper
+  #   restart: always
+  #   # environment:
+  #   #   BROKER_ID: 2
+  #   volumes:
+  #     - stream_workspace:/home
+  #     # - stream_kafka_data:/opt/kafka/data
+  #   ports:
+  #     - "9094:9092"
+  #   command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server2.properties
